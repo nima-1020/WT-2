@@ -1,0 +1,153 @@
+//index.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Information</title>
+</head>
+<body>
+    <h1>Customer Information</h1>
+    <form action="product_form.php" method="post">
+        <label for="name">Name:</label>
+        <input type="text" name="name" required><br>
+
+        <label for="addr">Address:</label>
+        <input type="text" name="addr" required><br>
+
+        <label for="mobNo">Mobile Number:</label>
+        <input type="text" name="mobNo" required><br>
+
+        <input type="submit" value="Next">
+    </form>
+</body>
+</html>
+
+
+//product form php
+
+<?php
+session_start();
+
+// Check if customer information is available in the session
+if (!isset($_SESSION['customer_info'])) {
+    header("Location: index.html");
+    exit();
+}
+
+// Check if form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get product information from the form
+    $prodName = $_POST['prodName'];
+    $qty = $_POST['qty'];
+    $rate = $_POST['rate'];
+
+    // Save product information in session
+    $_SESSION['product_info'][] = compact('prodName', 'qty', 'rate');
+
+    // Redirect to the next page for generating the bill
+    header("Location: generate_bill.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Information</title>
+</head>
+<body>
+    <h1>Product Information</h1>
+
+    <?php
+    // Display customer information from session
+    $customerInfo = $_SESSION['customer_info'];
+    echo "<p>Name: {$customerInfo['name']}</p>";
+    echo "<p>Address: {$customerInfo['addr']}</p>";
+    echo "<p>Mobile Number: {$customerInfo['mobNo']}</p>";
+    ?>
+
+    <form action="" method="post">
+        <label for="prodName">Product Name:</label>
+        <input type="text" name="prodName" required><br>
+
+        <label for="qty">Quantity:</label>
+        <input type="text" name="qty" required><br>
+
+        <label for="rate">Rate:</label>
+        <input type="text" name="rate" required><br>
+
+        <input type="submit" value="Add Product">
+    </form>
+</body>
+</html>
+
+
+//generate bill
+
+<?php
+session_start();
+
+// Check if customer information and product information are available in the session
+if (!isset($_SESSION['customer_info']) || !isset($_SESSION['product_info'])) {
+    header("Location: index.html");
+    exit();
+}
+
+// Display the bill
+$customerInfo = $_SESSION['customer_info'];
+$productInfo = $_SESSION['product_info'];
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Bill</title>
+</head>
+<body>
+    <h1>Bill</h1>
+
+    <h2>Customer Information</h2>
+    <p>Name: <?php echo $customerInfo['name']; ?></p>
+    <p>Address: <?php echo $customerInfo['addr']; ?></p>
+    <p>Mobile Number: <?php echo $customerInfo['mobNo']; ?></p>
+
+    <h2>Product Information</h2>
+    <table border="1">
+        <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Rate</th>
+        </tr>
+        <?php foreach ($productInfo as $product) : ?>
+            <tr>
+                <td><?php echo $product['prodName']; ?></td>
+                <td><?php echo $product['qty']; ?></td>
+                <td><?php echo $product['rate']; ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+
+    <h2>Total Amount</h2>
+    <?php
+    // Calculate total amount
+    $totalAmount = 0;
+    foreach ($productInfo as $product) {
+        $totalAmount += $product['qty'] * $product['rate'];
+    }
+    echo "<p>Total Amount: $totalAmount</p>";
+    ?>
+
+    <?php
+    // Clear session data
+    session_unset();
+    session_destroy();
+    ?>
+</body>
+</html>
