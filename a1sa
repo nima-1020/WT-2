@@ -1,0 +1,78 @@
+//a
+<?php
+session_start();
+if (!isset($_SESSION['visit_count'])) {
+    $_SESSION['visit_count'] = 1;
+} else {
+    $_SESSION['visit_count']++;
+}
+if (isset($_COOKIE['last_visit'])) {
+    $lastVisit = $_COOKIE['last_visit'];
+    echo "Welcome back! Your last visit was on: $lastVisit";
+}
+setcookie('last_visit', date("Y-m-d H:i:s"), time() + (86400 * 30), "/"); 
+echo "<p>This web page has been accessed " . $_SESSION['visit_count'] . " times.</p>";
+?>
+
+//b
+
+<?php
+function setPreferenceCookie($name, $value, $expire) {
+    setcookie($name, $value, $expire, "/");
+}
+function getCookieValue($name, $default) {
+    return isset($_COOKIE[$name]) ? $_COOKIE[$name] : $default;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the selected preferences from the form
+    $fontStyle = $_POST['fontStyle'];
+    $fontSize = $_POST['fontSize'];
+    $fontColor = $_POST['fontColor'];
+    $bgColor = $_POST['bgColor'];
+    setPreferenceCookie('fontStyle', $fontStyle, time() + (86400 * 30));
+    setPreferenceCookie('fontSize', $fontSize, time() + (86400 * 30));
+    setPreferenceCookie('fontColor', $fontColor, time() + (86400 * 30));
+    setPreferenceCookie('bgColor', $bgColor, time() + (86400 * 30));
+    header("Location: page2.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Page Preferences</title>
+    <style>
+        body {
+            font-family: <?php echo getCookieValue('fontStyle', 'Arial'); ?>;
+            font-size: <?php echo getCookieValue('fontSize', '16px'); ?>;
+            color: <?php echo getCookieValue('fontColor', '#000000'); ?>;
+            background-color: <?php echo getCookieValue('bgColor', '#ffffff'); ?>;
+        }
+    </style>
+</head>
+<body>
+    <h1>Web Page Preferences</h1>
+    <form method="post" action="">
+        <label for="fontStyle">Font Style:</label>
+        <select name="fontStyle">
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Verdana">Verdana</option>
+        </select><br>
+        <label for="fontSize">Font Size:</label>
+        <select name="fontSize">
+            <option value="16px">Small</option>
+            <option value="20px">Medium</option>
+            <option value="24px">Large</option>
+        </select><br>
+        <label for="fontColor">Font Color:</label>
+        <input type="color" name="fontColor" value="#000000"><br>
+        <label for="bgColor">Background Color:</label>
+        <input type="color" name="bgColor" value="#ffffff"><br>
+        <input type="submit" value="Set Preferences">
+    </form>
+</body>
+</html>
